@@ -1,0 +1,6 @@
+CTkMenuBar==0.3
+CTkTable==1.1
+customtkinter==5.2.2
+phe==1.5.0
+pillow==10.2.0
+Pyfhel==3.4.2

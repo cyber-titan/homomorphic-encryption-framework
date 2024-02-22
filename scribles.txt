@@ -1,0 +1,204 @@
+# ************************* FINAL BFV *************************
+from Pyfhel import Pyfhel
+
+HE = Pyfhel()
+HE.contextGen(scheme='BFV', n = 4096, t_bits = 20)
+HE.keyGen()
+
+
+a, b = 2, 3
+a_enc, b_enc = HE.encrypt(a), HE.encrypt(b)
+c_enc = a_enc + b_enc
+
+print(HE.decrypt(c_enc)[0])
+# ************************* FINAL BFV *************************
+# ************************* FINAL CKKS *************************
+from Pyfhel import Pyfhel
+
+HE = Pyfhel(
+    context_params = {'scheme': 'CKKS',
+                      'n': 16384,
+                      'qi_sizes': [30, 30, 30, 30, 30],
+                      'scale': 2**30},
+    key_gen = True,
+)
+
+
+a, b = 4.6, 5.4
+a_enc, b_enc = HE.encrypt(a), HE.encrypt(b)
+
+c_enc = a_enc + b_enc
+print("10.0", HE.decrypt(c_enc)[0])
+c_enc = a_enc - b_enc
+print("-0.8", HE.decrypt(c_enc)[0])
+c_enc = a_enc * b_enc
+print("24.84", HE.decrypt(c_enc)[0])
+# ************************* FINAL CKKS *************************
+
+# ************************* FINAL BGV *************************
+from Pyfhel import Pyfhel
+
+HE = Pyfhel()
+HE.contextGen(scheme='BGV', n = 4096, t_bits = 20)
+HE.keyGen()
+
+
+a, b = 2, 3
+a_enc, b_enc = HE.encrypt(a), HE.encrypt(b)
+c_enc = a_enc + b_enc
+
+print(HE.decrypt(c_enc)[0])
+# ************************* FINAL BGV *************************
+
+# ************************* text decoration *************************
+print("\033[1mBoldText\033[0m")
+print("\033[3mItalicText\033[0m")
+print("\033[1;3mBold&Italic\033[0m")
+# ************************* text decoration *************************
+
+# ************************* loading code *************************
+from tqdm import tqdm
+import time
+
+def loading():
+    print()
+    time.sleep(1)
+    for i in tqdm(range(int(100))):
+        time.sleep(0.01)  
+    print()
+# ************************* loading code *************************
+
+# ************************* save and load PyCtxt *************************
+from Pyfhel import Pyfhel, PyCtxt, PyPtxt
+
+HE = Pyfhel()           # Creating empty Pyfhel object
+bfv_params = {
+    'scheme': 'BFV',    # can also be 'bfv'
+    'n': 2**13,         # Polynomial modulus degree, the num. of slots per plaintext,
+                        #  of elements to be encoded in a single ciphertext in a
+                        #  2 by n/2 rectangular matrix (mind this shape for rotations!)
+                        #  Typ. 2^D for D in [10, 16]
+    't': 65537,         # Plaintext modulus. Encrypted operations happen modulo t
+                        #  Must be prime such that t-1 be divisible by 2^N.
+    't_bits': 20,       # Number of bits in t. Used to generate a suitable value
+                        #  for t. Overrides t if specified.
+    'sec': 128,         # Security parameter. The equivalent length of AES key in bits.
+                        #  Sets the ciphertext modulus q, can be one of {128, 192, 256}
+                        #  More means more security but also slower computation.
+}
+HE.contextGen(**bfv_params)  # Generate context for bfv scheme
+HE.keyGen()             # Key Generation: generates a pair of public/secret keys
+HE.rotateKeyGen()       # Rotate key generation --> Allows rotation/shifting
+HE.relinKeyGen() 
+
+a, b = 2, 3
+a_enc, b_enc = HE.encrypt(a), HE.encrypt(b)
+c_enc = a_enc + b_enc
+print(type(c_enc))
+print(c_enc)
+
+# cipher text — save & load cipher text in file
+HE.save_context('GUI CODE/Outputs/context.txt')
+HE.save_public_key('GUI CODE/Outputs/public_key.txt')
+HE.save_secret_key('GUI CODE/Outputs/secret_key.txt')
+HE.save_relin_key('GUI CODE/Outputs/relin_key.txt')
+HE.save_rotate_key('GUI CODE/Outputs/rotate_key.txt')
+c_enc.save('GUI CODE/Outputs/result.txt')
+
+HE_new = Pyfhel()
+HE_new.load_context('GUI CODE/Outputs/context.txt')
+HE_new.load_public_key('GUI CODE/Outputs/public_key.txt')
+HE_new.load_secret_key('GUI CODE/Outputs/secret_key.txt')
+HE_new.load_relin_key('GUI CODE/Outputs/relin_key.txt')
+HE_new.load_rotate_key('GUI CODE/Outputs/rotate_key.txt')
+c_enc.load('GUI CODE/Outputs/result.txt')
+
+print(HE_new.decrypt(c_enc)[0])
+# ************************* save and load PyCtxt *************************
+
+# ************************* time benchmark analysis *************************
+import time
+
+start = time.time()
+# all code here
+end = time.time()
+
+print("The time of execution of above program is :", (end-start)*10**3, "ms")
+print("The time of execution of above program is :", (end-start), , "sec")
+print("The time of execution of above program is : %.6f" % (end-start), , "sec")
+# ************************* time benchmark analysis *************************
+
+# ************************* space benchmark analysis *************************
+import sys
+res = sys.getsizeof(HE)
+# all code here
+
+print(res, 'bytes')
+print(res/1000, 'kb')
+print(res/1000000, 'mb')
+print(res/1000000000, 'gb')
+# ************************* space benchmark analysis *************************
+
+# ************************* NEW OPERATIONS FOUND *************************
+——> add, sub, multiply
+
+1. power/exponent
+c_enc = HE.power(a_enc, 2)
+or
+c_enc = a_enc ** 3
+
+2. square
+c_enc = HE.square(a_enc)
+
+3. negate (-ve to +ve or +ve to -ve)
+c_enc = HE.negate(a_enc)
+
+explore ——> poly
+# ************************* NEW OPERATIONS FOUND *************************
+
+# ************************* GUI template *************************
+import customtkinter as ctk
+
+win = ctk.CTk()
+win.title('Homomorphic Encryption Framework')
+win.geometry('540x540+600+300')
+win.resizable(False, True)
+win.minsize(300, 300)
+win.maxsize(540, 600)
+
+
+win.mainloop()
+# ************************* GUI template *************************
+
+# ************************* GUI entry button & clear entry after input template *************************
+import customtkinter as ctk
+
+win = ctk.CTk()
+win.title('Name Submit')
+win.geometry('500x500')
+
+def submit_button():
+    print(f"Hi {inp.get()}")
+    inp.delete(0, ctk.END)
+
+inp = ctk.CTkEntry(win, placeholder_text='Enter Name')
+inp.pack()
+btn = ctk.CTkButton(master=win, text= 'Submit', command=submit_button)
+btn.pack()
+
+win.mainloop()
+# ************************* GUI entry button & clear entry after input template *************************
+
+
+# ************************* Delete Ouptput Folder Files *************************
+import os
+
+path = '/Users/cyber_titan/Desktop/Major Project MENU CODE/GUI CODE/Outputs'
+for filename in os.listdir(path):
+    if os.path.isfile(os.path.join(path, filename)):
+        os.remove(os.path.join(path, filename))
+# ************************* Delete Ouptput Folder Files *************************
+
+# ************************* ChatGPT Questions *************************
+1. can i make a single file somehow like I have multiple files main.py, gfv.py, etc, so I want to make a single icon/application on which user will click which will run the main.py file in terminal. I am making a menu based tool for homomorphic encryption
+# ************************* ChatGPT Questions *************************
